@@ -1,13 +1,27 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
-workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
-    jobs:
-      - welcome/run
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202010-01 # recommended linux image
+    steps: 
+            - checkout
+         #   - run: git clone --depth 1  "https://github.com/Little-W/android_kernel_xiaomi_ginkgo" --branch "$CIRCLE_BRANCH" 
+            - run: 
+                name: Install Deps
+                command: curl -OsSL https://raw.githubusercontent.com/Little-W/build-script/master/environment.sh && bash environment.sh 
+            - run: 
+                name: Build
+                command: curl -OsSL https://raw.githubusercontent.com/Little-W/build-script/master/build.sh && bash build.sh
+                no_output_timeout: 240m
+           # - add_ssh_keys:
+            #    fingerprints:
+                 # - "91:a0:3f:28:71:73:88:55:fc:05:40:f6:cf:d8:94:7d"
+            - run: 
+                name: Upload
+                command: |
+                    git clone git@github.com:Little-W/redentials.git ~/re
+                    git config --global credential.helper store
+                    cp -v ~/re/.git-credentials ~/
+                    git config --global user.email "1405481963@qq.com"
+                    git config --global user.name "Little-W"
+                    curl -OsSL https://raw.githubusercontent.com/Little-W/build-script/master/upload.sh && bash upload.sh
